@@ -373,6 +373,9 @@ func (c *WhatsAppNativeChannel) handleIncoming(evt *events.Message) {
 
 	peerKind := "direct"
 	if evt.Info.Chat.Server == types.GroupServer {
+		if c.config.DMOnly {
+			return
+		}
 		peerKind = "group"
 	}
 	peer := bus.Peer{Kind: peerKind, ID: chatID}

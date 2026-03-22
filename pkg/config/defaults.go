@@ -53,6 +53,7 @@ func DefaultConfig() *Config {
 				BridgeURL:        "ws://localhost:3001",
 				UseNative:        false,
 				SessionStorePath: "",
+				DMOnly:           false,
 				AllowFrom:        FlexibleStringSlice{},
 			},
 			Telegram: TelegramConfig{

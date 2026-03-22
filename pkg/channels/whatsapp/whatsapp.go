@@ -227,6 +227,9 @@ func (c *WhatsAppChannel) handleIncomingMessage(msg map[string]any) {
 	if chatID == senderID {
 		peer = bus.Peer{Kind: "direct", ID: senderID}
 	} else {
+		if c.config.DMOnly {
+			return
+		}
 		peer = bus.Peer{Kind: "group", ID: chatID}
 	}
 
