@@ -344,6 +344,14 @@ func (c *WhatsAppNativeChannel) handleIncoming(evt *events.Message) {
 	if evt.Message == nil {
 		return
 	}
+	// Skip messages sent by our own account to other contacts.
+	// Allow self-chat (where chat JID == own JID) so the user can talk to the bot.
+	if evt.Info.IsFromMe {
+		ownJID := c.client.Store.ID
+		if ownJID == nil || evt.Info.Chat.User != ownJID.User {
+			return
+		}
+	}
 	senderID := evt.Info.Sender.String()
 	chatID := evt.Info.Chat.String()
 	content := evt.Message.GetConversation()
