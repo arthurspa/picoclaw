@@ -1,0 +1,28 @@
+services:
+  # One-shot CLI query:
+  #   docker compose -f docker/docker-compose.whatsapp.yml run --rm agent -m "Hello"
+  agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        EXTRA_TAGS: whatsapp_native
+    container_name: picoclaw-agent
+    volumes:
+      - ./data:/home/picoclaw/.picoclaw
+    entrypoint: ["picoclaw", "agent"]
+    stdin_open: true
+    tty: true
+
+  # Long-running WhatsApp bot:
+  #   docker compose -f docker/docker-compose.whatsapp.yml up gateway
+  gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        EXTRA_TAGS: whatsapp_native
+    container_name: picoclaw-gateway
+    restart: on-failure
+    volumes:
+      - ./data:/home/picoclaw/.picoclaw

@@ -3,6 +3,9 @@
 # ============================================================
 FROM golang:1.25-alpine AS builder
 
+# Extra Go build tags (e.g. "whatsapp_native" for in-process WhatsApp support)
+ARG EXTRA_TAGS=""
+
 RUN apk add --no-cache git make
 
 WORKDIR /src
@@ -13,7 +16,9 @@ RUN go mod download
 
 # Copy source and build
 COPY . .
-RUN make build
+RUN make generate && \
+    CGO_ENABLED=0 go build -v -tags "stdjson${EXTRA_TAGS:+,}${EXTRA_TAGS}" \
+      -ldflags "-s -w" -o build/picoclaw ./cmd/picoclaw
 
 # ============================================================
 # Stage 2: Minimal runtime image
