@@ -78,6 +78,16 @@ func MatchAllowed(sender bus.SenderInfo, allowed string) bool {
 		return true
 	}
 
+	// Match bare numeric allow entry against the user portion of a JID-style
+	// PlatformID (e.g. allow "46730956607" matches PlatformID "46730956607@s.whatsapp.net").
+	if sender.PlatformID != "" && isNumeric(allowedID) {
+		if atIdx := strings.Index(sender.PlatformID, "@"); atIdx > 0 {
+			if sender.PlatformID[:atIdx] == allowedID {
+				return true
+			}
+		}
+	}
+
 	// Match against Username only when explicitly requested via "@username"
 	if isAtUsername && sender.Username != "" && sender.Username == trimmed {
 		return true

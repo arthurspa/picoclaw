@@ -223,6 +223,52 @@ func TestMatchAllowed(t *testing.T) {
 			allowed: "  123456  ",
 			want:    true,
 		},
+		// JID-style PlatformID: bare phone number matches user portion
+		{
+			name: "bare phone matches JID PlatformID",
+			sender: bus.SenderInfo{
+				Platform:   "whatsapp",
+				PlatformID: "46730956607@s.whatsapp.net",
+			},
+			allowed: "46730956607",
+			want:    true,
+		},
+		{
+			name: "bare phone does not match different JID PlatformID",
+			sender: bus.SenderInfo{
+				Platform:   "whatsapp",
+				PlatformID: "11234567890@s.whatsapp.net",
+			},
+			allowed: "46730956607",
+			want:    false,
+		},
+		{
+			name: "full JID in allow matches full JID PlatformID",
+			sender: bus.SenderInfo{
+				Platform:   "whatsapp",
+				PlatformID: "46730956607@s.whatsapp.net",
+			},
+			allowed: "46730956607@s.whatsapp.net",
+			want:    true,
+		},
+		{
+			name: "bare phone does not match LID PlatformID",
+			sender: bus.SenderInfo{
+				Platform:   "whatsapp",
+				PlatformID: "76802773020849@lid",
+			},
+			allowed: "46730956607",
+			want:    false,
+		},
+		{
+			name: "bare LID number matches LID JID PlatformID",
+			sender: bus.SenderInfo{
+				Platform:   "whatsapp",
+				PlatformID: "76802773020849@lid",
+			},
+			allowed: "76802773020849",
+			want:    true,
+		},
 	}
 
 	for _, tt := range tests {

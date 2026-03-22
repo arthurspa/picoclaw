@@ -387,6 +387,24 @@ func (c *WhatsAppNativeChannel) handleIncoming(evt *events.Message) {
 		DisplayName: evt.Info.PushName,
 	}
 
+	// When the sender JID is a LID (@lid), try to resolve the phone number
+	// so that allow_from entries with plain phone numbers still work.
+	if evt.Info.Sender.Server == types.HiddenUserServer {
+		c.mu.Lock()
+		client := c.client
+		c.mu.Unlock()
+		if client != nil && client.Store != nil {
+			if pnJID, err := client.Store.GetAltJID(c.runCtx, evt.Info.Sender); err == nil && !pnJID.IsEmpty() {
+				phoneID := pnJID.String()
+				// Use the phone-number JID as the primary platform ID so
+				// allow_from entries like "46730956607" or
+				// "46730956607@s.whatsapp.net" match naturally.
+				sender.PlatformID = phoneID
+				sender.CanonicalID = identity.BuildCanonicalID("whatsapp", phoneID)
+			}
+		}
+	}
+
 	if !c.IsAllowedSender(sender) {
 		return
 	}
