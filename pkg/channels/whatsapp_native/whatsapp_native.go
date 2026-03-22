@@ -20,6 +20,7 @@ import (
 
 	"github.com/mdp/qrterminal/v3"
 	"go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/proto/waCommon"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
@@ -423,6 +424,71 @@ func (c *WhatsAppNativeChannel) handleIncoming(evt *events.Message) {
 		map[string]any{"sender_id": senderID, "content_preview": utils.Truncate(content, 50)},
 	)
 	c.HandleMessage(c.runCtx, peer, messageID, senderID, chatID, content, mediaPaths, metadata, sender)
+}
+
+// ReactToMessage implements channels.ReactionCapable.
+// Sends a 👀 reaction and returns an undo function that removes it.
+func (c *WhatsAppNativeChannel) ReactToMessage(ctx context.Context, chatID, messageID string) (func(), error) {
+	if !c.config.AckReaction {
+		return func() {}, nil
+	}
+
+	c.mu.Lock()
+	client := c.client
+	c.mu.Unlock()
+	if client == nil {
+		return func() {}, nil
+	}
+
+	now := time.Now().UnixMilli()
+	msgKey := &waCommon.MessageKey{
+		RemoteJID: &chatID,
+		FromMe:    proto.Bool(false),
+		ID:        proto.String(messageID),
+	}
+
+	reactionMsg := &waE2E.Message{
+		ReactionMessage: &waE2E.ReactionMessage{
+			Key:               msgKey,
+			Text:              proto.String("👀"),
+			SenderTimestampMS: &now,
+		},
+	}
+
+	chatJID, err := parseJID(chatID)
+	if err != nil {
+		return func() {}, nil
+	}
+
+	if _, err := client.SendMessage(ctx, chatJID, reactionMsg); err != nil {
+		logger.WarnCF("whatsapp", "Failed to send ack reaction", map[string]any{
+			"error": err.Error(),
+		})
+		return func() {}, nil
+	}
+
+	// Return undo: send empty text to remove the reaction.
+	return func() {
+		c.mu.Lock()
+		cl := c.client
+		c.mu.Unlock()
+		if cl == nil {
+			return
+		}
+		undoNow := time.Now().UnixMilli()
+		undoMsg := &waE2E.Message{
+			ReactionMessage: &waE2E.ReactionMessage{
+				Key:               msgKey,
+				Text:              proto.String(""),
+				SenderTimestampMS: &undoNow,
+			},
+		}
+		if _, err := cl.SendMessage(c.runCtx, chatJID, undoMsg); err != nil {
+			logger.WarnCF("whatsapp", "Failed to remove ack reaction", map[string]any{
+				"error": err.Error(),
+			})
+		}
+	}, nil
 }
 
 func (c *WhatsAppNativeChannel) Send(ctx context.Context, msg bus.OutboundMessage) error {

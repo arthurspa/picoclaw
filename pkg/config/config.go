@@ -373,6 +373,7 @@ type WhatsAppConfig struct {
 	SessionStorePath   string              `json:"session_store_path"   env:"PICOCLAW_CHANNELS_WHATSAPP_SESSION_STORE_PATH"`
 	DMOnly             bool                `json:"dm_only"              env:"PICOCLAW_CHANNELS_WHATSAPP_DM_ONLY"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"PICOCLAW_CHANNELS_WHATSAPP_ALLOW_FROM"`
+	AckReaction        bool                `json:"ack_reaction"         env:"PICOCLAW_CHANNELS_WHATSAPP_ACK_REACTION"`
 	ReasoningChannelID string              `json:"reasoning_channel_id" env:"PICOCLAW_CHANNELS_WHATSAPP_REASONING_CHANNEL_ID"`
 }
 

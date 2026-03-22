@@ -54,6 +54,7 @@ func DefaultConfig() *Config {
 				UseNative:        false,
 				SessionStorePath: "",
 				DMOnly:           false,
+				AckReaction:      false,
 				AllowFrom:        FlexibleStringSlice{},
 			},
 			Telegram: TelegramConfig{
