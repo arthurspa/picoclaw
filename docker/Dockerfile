@@ -16,7 +16,8 @@ RUN go mod download
 
 # Copy source and build
 COPY . .
-RUN make generate && \
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    make generate && \
     CGO_ENABLED=0 go build -v -tags "stdjson${EXTRA_TAGS:+,}${EXTRA_TAGS}" \
       -ldflags "-s -w" -o build/picoclaw ./cmd/picoclaw
 
