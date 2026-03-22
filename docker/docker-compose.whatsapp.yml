@@ -23,6 +23,6 @@ services:
       args:
         EXTRA_TAGS: whatsapp_native
     container_name: picoclaw-gateway
-    restart: on-failure
+    restart: unless-stopped
     volumes:
       - ./data:/home/picoclaw/.picoclaw
