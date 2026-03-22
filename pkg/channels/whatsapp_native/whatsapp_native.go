@@ -520,8 +520,14 @@ func (c *WhatsAppNativeChannel) Send(ctx context.Context, msg bus.OutboundMessag
 		return fmt.Errorf("invalid chat id %q: %w", msg.ChatID, err)
 	}
 
+	content := msg.Content
+	// Prefix replies in self-chat so the user can distinguish bot messages.
+	if c.config.SelfChatPrefix != "" && client.Store.ID != nil && to.User == client.Store.ID.User {
+		content = c.config.SelfChatPrefix + " " + content
+	}
+
 	waMsg := &waE2E.Message{
-		Conversation: proto.String(msg.Content),
+		Conversation: proto.String(content),
 	}
 
 	if _, err = client.SendMessage(ctx, to, waMsg); err != nil {

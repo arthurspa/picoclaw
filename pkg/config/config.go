@@ -374,6 +374,7 @@ type WhatsAppConfig struct {
 	DMOnly             bool                `json:"dm_only"              env:"PICOCLAW_CHANNELS_WHATSAPP_DM_ONLY"`
 	AllowFrom          FlexibleStringSlice `json:"allow_from"           env:"PICOCLAW_CHANNELS_WHATSAPP_ALLOW_FROM"`
 	AckReaction        bool                `json:"ack_reaction"         env:"PICOCLAW_CHANNELS_WHATSAPP_ACK_REACTION"`
+	SelfChatPrefix     string              `json:"self_chat_prefix"     env:"PICOCLAW_CHANNELS_WHATSAPP_SELF_CHAT_PREFIX"`
 	ReasoningChannelID string              `json:"reasoning_channel_id" env:"PICOCLAW_CHANNELS_WHATSAPP_REASONING_CHANNEL_ID"`
 }
 

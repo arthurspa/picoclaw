@@ -55,6 +55,7 @@ func DefaultConfig() *Config {
 				SessionStorePath: "",
 				DMOnly:           false,
 				AckReaction:      false,
+				SelfChatPrefix:   "[picoclaw]",
 				AllowFrom:        FlexibleStringSlice{},
 			},
 			Telegram: TelegramConfig{
